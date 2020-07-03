@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+
+{% block head %}
+<Title>StaticScore Search Results</Title>
+
+{% endblock %}
+
+
+{% block body %}
+<table style="width:40%;margin-left:auto;margin-right:auto;">
+  <caption>Search results for: {{ search_text }}</caption>
+  <tr>
+    <th>POSTER</th>
+    <th>TITLE</th>
+    <th>RELEASE DATE</th>
+    <th>VOTE</th>
+  </tr>
+  {% for movie in results %}
+  <tr>
+    <td>
+      {% if movie['poster_path'] == None %}
+        {%  set poster_path = url_for('static', filename='assets/no_image.png') %}
+      {% else %}
+        {% set poster_path = "https://image.tmdb.org/t/p/w500" + movie['poster_path'] %}
+      {% endif %}
+    <img
+        src="{{ poster_path }}"
+        style="height:100px"
+    />
+    </td>
+    <td>{{ movie['title'] }}</td>
+    <td>{{ movie['release_date'] }}</td>
+    <td>
+      <form action="/index" method="POST">
+        <div style="float:left;">
+          Posi-score<br/>
+          <input
+            type="text"
+            id="ps{{ movie['id'] }}"
+            name="ps{{ movie['id'] }}"
+            style="width:20px"
+          ><br/>
+          Nega-score<br/>
+          <input
+            type="text"
+            id="ns{{ movie['id'] }}"
+            name="ns{{ movie['id'] }}"
+            style="width:20px"
+          ><br/>
+        </div>
+        <div style="float:right;">
+          <input
+            type="submit"
+            value="Poll!"
+            id="{{ movie['id'] }}"
+            name="vote{{ movie['id'] }}">
+        </div>
+      </form>
+    </td>
+  </tr>
+{% endfor %}
+</table>
+
+{% endblock %}

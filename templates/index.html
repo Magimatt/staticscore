@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+
+{% block head %}
+<Title>StaticScore Movie Rankings</Title>
+
+{% endblock %}
+
+
+{% block body %}
+<div>
+    <table>
+        <caption>POSISCORE RANKINGS</caption>
+            <tr>
+                <th>Movie</th>
+                <th>Posiscore</th>
+            </tr>
+            {% for movie in range(10) %}
+                <tr>
+                    <td></td>
+                </tr>
+            {% endfor %}
+    </table>>
+</div>
+
+{% endblock %}
