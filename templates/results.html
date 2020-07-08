@@ -24,37 +24,53 @@
       {% else %}
         {% set poster_path = "https://image.tmdb.org/t/p/w500" + movie['poster_path'] %}
       {% endif %}
-    <img
+    <a href="https://www.themoviedb.org/movie/{{ movie['id'] }}-{{ movie['title'] }}" >
+      <img
         src="{{ poster_path }}"
-        style="height:100px"
-    />
+        style="height:220px"
+        class="poll"
+      />
+    </a>
     </td>
     <td>{{ movie['title'] }}</td>
     <td>{{ movie['release_date'] }}</td>
     <td>
-      <form action="/index" method="POST">
-        <div style="float:left;">
-          Posi-score<br/>
+      <form action="/vote" method="POST">
+        <input
+          type="hidden"
+          id="movietitle-{{ movie['id'] }}"
+          name="movie-title"
+          value="{{ movie['title'] }}"
+        />
+        <input
+          type="hidden"
+          id="movieid-{{ movie['id'] }}"
+          name="movie-id"
+          value="{{ movie['id'] }}"
+        />
+        <div style="float:left;" class="poll">
+          Posi-score<br/><!-- use a "radio button" electron shaped option instead -->
           <input
             type="text"
-            id="ps{{ movie['id'] }}"
-            name="ps{{ movie['id'] }}"
+            id="ps-{{ movie['id'] }}"
+            name="ps-vote"
             style="width:20px"
           ><br/>
-          Nega-score<br/>
+          Nega-score<br/><!-- use a "radio button" electron shaped option instead -->
           <input
             type="text"
-            id="ns{{ movie['id'] }}"
-            name="ns{{ movie['id'] }}"
+            id="ns-{{ movie['id'] }}"
+            name="ns-vote"
             style="width:20px"
           ><br/>
         </div>
-        <div style="float:right;">
+        <div style="float:right;" class="poll">
           <input
             type="submit"
-            value="Poll!"
-            id="{{ movie['id'] }}"
-            name="vote{{ movie['id'] }}">
+            value="Vote!"
+            id="vote-{{ movie['id'] }}"
+            name="vote"
+          >
         </div>
       </form>
     </td>

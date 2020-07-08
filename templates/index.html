@@ -2,25 +2,59 @@
 
 
 {% block head %}
-<Title>StaticScore Movie Rankings</Title>
+<title>StaticScore Movie Rankings</title>
 
 {% endblock %}
 
 
 {% block body %}
-<div>
-    <table>
-        <caption>POSISCORE RANKINGS</caption>
-            <tr>
-                <th>Movie</th>
-                <th>Posiscore</th>
-            </tr>
-            {% for movie in range(10) %}
-                <tr>
-                    <td></td>
-                </tr>
-            {% endfor %}
-    </table>>
+
+<div style="display:flex;justify-content:center;align-items:center;">
+  <div style="padding:40px;">
+      <table>
+          <caption>POSISCORE RANKINGS</caption>
+              <tr>
+                  <th>Movie</th>
+                  <th>Posiscore</th>
+              </tr>
+              {% for movie in top_posi %}
+                  <tr>
+                      <td>{{ movie['movie_name'] }}</td>
+                      <td>{{ "{:.2f}".format(movie['ave_posiscore']) }}</td>
+                  </tr>
+              {% endfor %}
+      </table>
+  </div>
+  <div style="padding:40px;">
+      <table>
+          <caption>COMBINED SCORE RANKINGS</caption>
+              <tr>
+                  <th>Movie</th>
+                  <th>Combined Score</th>
+              </tr>
+              {% for movie in top_comb %}
+                  <tr>
+                      <td>{{ movie['movie_name'] }}</td>
+                      <td>{{ "{:.2f}".format(movie['ave_combscore']) }}</td>
+                  </tr>
+              {% endfor %}
+      </table>
+  </div>
+  <div style="padding:40px;">
+      <table>
+          <caption>NEGASCORE RANKINGS</caption>
+              <tr>
+                  <th>Movie</th>
+                  <th>Negascore</th>
+              </tr>
+              {% for movie in top_nega %}
+                  <tr>
+                      <td>{{ movie['movie_name'] }}</td>
+                      <td>{{ "{:.2f}".format(movie['ave_negascore']) }}</td>
+                  </tr>
+              {% endfor %}
+      </table>
+  </div>
 </div>
 
 {% endblock %}
