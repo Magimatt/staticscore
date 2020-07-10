@@ -10,7 +10,7 @@
 {% block body %}
 
 <div style="display:flex;justify-content:center;align-items:center;">
-  <div style="padding:40px;">
+  <div style="padding:40px;padding-top:120px;">
       <table>
           <caption>POSISCORE RANKINGS</caption>
               <tr>
@@ -19,7 +19,7 @@
               </tr>
               {% for movie in top_posi %}
                   <tr>
-                      <td>{{ movie['movie_name'] }}</td>
+                      <td>{{ loop.index }}. {{ movie['movie_name'] }}</td>
                       <td>{{ "{:.2f}".format(movie['ave_posiscore']) }}</td>
                   </tr>
               {% endfor %}
@@ -34,13 +34,13 @@
               </tr>
               {% for movie in top_comb %}
                   <tr>
-                      <td>{{ movie['movie_name'] }}</td>
+                      <td>{{ loop.index }}. {{ movie['movie_name'] }}</td>
                       <td>{{ "{:.2f}".format(movie['ave_combscore']) }}</td>
                   </tr>
               {% endfor %}
       </table>
   </div>
-  <div style="padding:40px;">
+  <div style="padding:40px;padding-top:120px;">
       <table>
           <caption>NEGASCORE RANKINGS</caption>
               <tr>
@@ -49,7 +49,7 @@
               </tr>
               {% for movie in top_nega %}
                   <tr>
-                      <td>{{ movie['movie_name'] }}</td>
+                      <td>{{ loop.index }}. {{ movie['movie_name'] }}</td>
                       <td>{{ "{:.2f}".format(movie['ave_negascore']) }}</td>
                   </tr>
               {% endfor %}

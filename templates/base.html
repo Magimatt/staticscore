@@ -17,17 +17,44 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='assets/main.css') }}"
     />
+    <link
+      rel="stylesheet"
+      href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"
+    />
   </head>
 
   <body>
-    <a href="/">
-      <img
-      src="{{ url_for('static', filename='assets/StaticScoreLogo.png') }}"
-      alt="Static Score Logo"
-      class="center"
-      style="width: 50%;max-width:764px;"
-      />
-    </a>
+    <h1>Staticscore Movie Rankings</h1>
+    <hr>
+    <div style="display:flex;justify-content:center;flex-direction:row;flex-flow:center;align-items:center;">        
+      <div style="padding:0px 30px 0px 30px;max-height:400px;transform:translate(30px);">
+        <p class="intro">
+          Posiscores are measure of a movie's quality. Objectively, 
+          did the movie have quality acting, writing, cinematography, practical effects? 
+          This score doesn't take into account how much you liked the movie, 
+          so don't let your personal enjoyment influence this score.
+        </p>
+      </div>
+      <div>
+        <a href="/">
+          <img
+          src="{{ url_for('static', filename='assets/StaticScoreLogo.png') }}"
+          alt="Static Score Logo"
+          class="center"
+          style="flex-basis:100%;max-width:764px;min-width:350px;"
+          />
+        </a>
+      </div>
+      <div style="padding:0px 30px 0px 30px;max-height:400px;transform:translate(-30px);">
+        <p class="intro" style="min-width:110px;">
+          Negascores are the opposite of posiscores. They are all about subjectivity. 
+          Who cares how incredible (or utterly awful) the CGI was! Negascores measures 
+          how much you like a movie. Let this score show how beloved or despised you 
+          find the number one critic's choice (or how you unironically adore "The Room").
+        </p>
+      </div>
+    </div>
+    <hr>
     <div class="search-bar">
       <form action="/results" method="GET">
         <input
@@ -47,7 +74,7 @@
       </form>
     </div>
     
-    {% with messages = get_flashed_messages() %}<!-- ah geez, gotta style the flash messages-->
+    {% with messages = get_flashed_messages() %} <!-- ah geez, gotta style the flash messages-->
       {% if messages %}
         <div class="flashes">
         {% for message in messages %}

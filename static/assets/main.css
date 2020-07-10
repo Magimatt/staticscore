@@ -4,14 +4,25 @@ body {
     background-color: #16161d;
   }
 
+hr {
+  margin: 0px;
+  height: 3px;
+  border-width: 0;
+  color: #be7eb9;
+  background-color: #be7eb9;
+}
+
 h1 {
-  color: white;
+  color: #be7eb9;
+  font: bolder 30px "Arial Black", Gadget, sans-serif;
   text-align: center;
 }
 
-p {
-  font-family: verdana;
-  font-size: 20px;
+.intro {
+  font: italic bold 14px;
+  font-family: "Lucida Console", Monaco, monospace sans-serif;
+  text-align: left;
+  color: #be7eb9;
 }
 
 .center {
@@ -103,13 +114,26 @@ p {
   height: 30px;
 }
 
-table, th, td {
+table, td {
   border: 1px solid #8084b3;
   background: #554d81;
   border-collapse: collapse;
+  border-spacing: 0;
   padding: 10px;
   text-align: left;
   color: #be7eb9;
+}
+
+th {
+  border: 1px solid #8084b3;
+  background: #be7eb9;
+  border-collapse: collapse;
+  border-spacing: 0;
+  padding: 10px;
+  text-align: center;
+  font-weight: bolder;
+  font-size: 115%;
+  color: #554d81;
 }
 
 tr:hover {
@@ -127,4 +151,5 @@ tr:hover {
   font: italic bold 20px Consolas, sans-serif;
   text-align: center;
   color: #be7eb9;
+  background: #d3eeff;
 }
