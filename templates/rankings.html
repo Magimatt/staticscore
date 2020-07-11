@@ -10,7 +10,7 @@
 {% block body %}
 
 <h1>
-  TOP 10 MOVIES RANKED
+  ALL MOVIES RANKED
 </h1>
 
 <div style="display:flex;justify-content:center;align-items:center;">
@@ -21,7 +21,7 @@
                   <th>Movie</th>
                   <th>Posiscore</th>
               </tr>
-              {% for movie in top_posi %}
+              {% for movie in posi_rank %}
                   <tr>
                       <td>{{ loop.index }}. {{ movie['movie_name'] }}</td>
                       <td>{{ "{:.2f}".format(movie['ave_posiscore']) }}</td>
@@ -36,7 +36,7 @@
                   <th>Movie</th>
                   <th>Combined Score</th>
               </tr>
-              {% for movie in top_comb %}
+              {% for movie in comb_rank %}
                   <tr>
                       <td>{{ loop.index }}. {{ movie['movie_name'] }}</td>
                       <td>{{ "{:.2f}".format(movie['ave_combscore']) }}</td>
@@ -51,7 +51,7 @@
                   <th>Movie</th>
                   <th>Negascore</th>
               </tr>
-              {% for movie in top_nega %}
+              {% for movie in nega_rank %}
                   <tr>
                       <td>{{ loop.index }}. {{ movie['movie_name'] }}</td>
                       <td>{{ "{:.2f}".format(movie['ave_negascore']) }}</td>

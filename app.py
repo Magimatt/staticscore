@@ -178,7 +178,6 @@ def vote():
     existing_movie = MovieInfo.query.filter_by(tmdb_id=movie_id).first()
     score_triuple = average_table_scores(movie_id)    # returns a 3 member tuple. averaged posiscore,
                                                       # averaged negascore, and averaged combined score.    
-
     try:
       if existing_movie == None:
         new_movie = MovieInfo(tmdb_id=movie_id,
@@ -199,6 +198,60 @@ def vote():
       flash("An error occured when submitting your vote. Please try again later.")
 
   return redirect('/')
+
+@app.route("/update", methods=['POST'])
+def update():
+  if not cookie_check():
+    flash("Hey A-hole! Stop trying to game the system... or maybe you're just an innocent bystander just trying to avoid cookies.")
+  else:
+    pass
+  
+  if (not(validate_input(request.form['ps-vote'])) or not(validate_input(request.form['ns-vote']))):
+    flash("An error occured. Please input only numbers 1 through 10 into the poll boxes and try again.")
+  else:
+    user_vote_record = MovieScores.query.filter(MovieScores.user_id == request.cookies.get('user_id'), 
+                                        MovieScores.tmdb_id == request.form['movie-id']).first()
+    user_vote_record.posiscore = request.form['ps-vote']
+    user_vote_record.negascore = request.form['ns-vote']
+    
+    db.session.commit()
+    existing_movie = MovieInfo.query.filter_by(tmdb_id=request.form['movie-id']).first()
+    score_triuple = average_table_scores(request.form['movie-id'])    # returns a 3 member tuple. averaged posiscore,
+                                                                      # averaged negascore, and averaged combined score.    
+    try:
+      existing_movie.ave_posiscore = score_triuple[0]
+      existing_movie.ave_negascore = score_triuple[1]
+      existing_movie.ave_combscore = score_triuple[2]
+
+      db.session.commit()    
+      flash("You're scores have been updated successfully.")
+    except:
+      flash("An error occured when submitting your update. Please try again later.")
+
+  return redirect('/')
+
+@app.route("/rankings", methods=['GET'])
+def rankings():
+  has_cookie = cookie_check()
+  
+  movies = MovieInfo.query.all()
+  movies_order_posi = sorted(movies, key=lambda m: m.ave_posiscore, reverse=True)
+  movies_order_nega = sorted(movies, key=lambda m: m.ave_negascore, reverse=True)
+  movies_order_comb = sorted(movies, key=lambda m: m.ave_combscore, reverse=True)
+  
+  # Set cookies if has_cookie is False
+  if has_cookie:
+    return render_template("rankings.html", 
+                           posi_rank=movies_order_posi, 
+                           nega_rank=movies_order_nega, 
+                           comb_rank=movies_order_comb)
+  else:
+    resp = make_response(render_template("rankings.html", 
+                                         posi_rank=movies_order_posi, 
+                                         nega_rank=movies_order_nega, 
+                                         comb_rank=movies_order_comb))
+    resp.set_cookie("user_id", str(uuid.uuid4()))
+    return resp
 
 if __name__ == '__main__':
   app.run(debug=True)

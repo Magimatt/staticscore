@@ -35,7 +35,8 @@
     <td>{{ movie['title'] }}</td>
     <td>{{ movie['release_date'] }}</td>
     <td>
-      <form action="/vote" method="POST">
+      {% set form_action = "/vote" if movie['user_vote'] == None else "/update" %}
+      <form action="{{ form_action }}" method="POST">
         <input
           type="hidden"
           id="movietitle-{{ movie['id'] }}"
