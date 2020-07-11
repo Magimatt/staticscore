@@ -29,10 +29,10 @@ db = SQLAlchemy(app)
 # SQLalchemy Database Classes
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
 class MovieInfo(db.Model):
-  tmdb_id = db.Column(db.String, primary_key=True)
-  movie_name = db.Column(db.String(200), nullable=False) # fun trivia: current longest movie title is 196 characters long.
-  ave_posiscore = db.Column(db.Float, default=0)
-  ave_negascore = db.Column(db.Float, default=0)
+  tmdb_id = db.Column(db.String(200), primary_key=True)
+  movie_name = db.Column(db.String(200), nullable=False)  # Fun trivia: the current longest 
+  ave_posiscore = db.Column(db.Float, default=0)          # movie title is 196 characters long.
+  ave_negascore = db.Column(db.Float, default=0)          # https://www.themoviedb.org/movie/637983-night-of-the-day-of-the-dawn-of-the-son-of-the-bride-of-the-return-of-the-revenge-of-the-terror-of-the-attack-of-the-evil-mutant-hellbound-flesh-eating-subhumanoid-zombified-living-dead-part-4?language=en-US
   ave_combscore = db.Column(db.Float, default=0)
 
   def __repr__(self):
@@ -69,7 +69,8 @@ def average_table_scores(_tmdb_id):
   posi = db.session.execute("SELECT AVG(posiscore) FROM movie_scores WHERE tmdb_id=" + _tmdb_id).first()['AVG(posiscore)']
   nega = db.session.execute("SELECT AVG(negascore) FROM movie_scores WHERE tmdb_id=" + _tmdb_id).first()['AVG(negascore)']
   
-  return posi, nega, ((posi + nega) / 2) # TODO: weight the combined score
+  # TODO: maybe weight the combined score toward negascores
+  return posi, nega, ((posi + nega) / 2)
   
 def validate_input(text):
   try:
@@ -81,7 +82,7 @@ def validate_input(text):
   except ValueError:
     return False
   
-def cookie_check(): #TODO: fix cookies
+def cookie_check():
   if not "user_id" in request.cookies:
     return False
   else:
@@ -121,14 +122,18 @@ def results():
   search_text = str(escape(request.args.get('search', '')))
   response = search_movies.movie(query=search_text)
   results = response['results']
-    
+  
+  # list of IDs from each movie in search results
   ids = [movie['id'] for movie in results]
-  user_votes = MovieScores.query.filter(MovieScores.user_id == request.cookies.get('user_id'),
-                                        MovieScores.tmdb_id in ids).all()
+  
+  # This query to the DB with votes filters by user ID (cookie) and movie ID. Basically
+  # getting the individual user's votes for movies in the searched list.
+  user_votes = MovieScores.query.filter(MovieScores.user_id == request.cookies.get('user_id'), 
+                                        MovieScores.tmdb_id.in_(ids)).all()
   
   new_results = []
   for movie in results:
-    _votes = [vote for vote in user_votes if vote.tmdb_id == movie["id"]]
+    _votes = [vote for vote in user_votes if vote.tmdb_id == str(movie['id'])]
     if len(_votes) > 0:
       user_vote = _votes[0]
     else:
@@ -136,18 +141,15 @@ def results():
 
     movie['user_vote'] = user_vote
     new_results.append(movie)
-    vote_value = ""    # This is needed in the template to determine if the user has voted on a movie before.
   
   if has_cookie:
     return render_template("results.html", results=new_results, 
                            search_text=search_text, 
-                           user_votes=user_votes, 
-                           vote_value=vote_value)
+                           user_votes=user_votes)
   else:
     resp = make_response(render_template("results.html", results=new_results, 
                                          search_text=search_text, 
-                                         user_votes=user_votes, 
-                                         vote_value=vote_value))
+                                         user_votes=user_votes))
     resp.set_cookie("user_id", str(uuid.uuid4()))
     return resp
 
@@ -160,7 +162,6 @@ def vote():
   
   if (not(validate_input(request.form['ps-vote'])) or not(validate_input(request.form['ns-vote']))):
     flash("An error occured. Please input only numbers 1 through 10 into the poll boxes and try again.")
-    
   else:
     posi_score = request.form['ps-vote']
     nega_score = request.form['ns-vote']
@@ -174,8 +175,9 @@ def vote():
 
     db.session.add(new_score)
     db.session.commit()
-    score_triuple = average_table_scores(movie_id)
     existing_movie = MovieInfo.query.filter_by(tmdb_id=movie_id).first()
+    score_triuple = average_table_scores(movie_id)    # returns a 3 member tuple. averaged posiscore,
+                                                      # averaged negascore, and averaged combined score.    
 
     try:
       if existing_movie == None:
