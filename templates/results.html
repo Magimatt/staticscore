@@ -51,6 +51,18 @@
           name="movie-id"
           value="{{ movie['id'] }}"
         />
+        <input
+          type="hidden"
+          id="movieid-{{ movie['release_date'] }}"
+          name="movie-release-date"
+          value="{{ movie['release_date'] }}"
+        />
+        <input
+          type="hidden"
+          id="movieid-{{ movie['poster_path'] }}"
+          name="movie-poster-path"
+          value="{{ movie['poster_path'] }}"
+        />
         <div style="float:left;" class="poll">Posi-score<br/><!-- use a "radio button" electron shaped option instead -->
           <input
             type="text"

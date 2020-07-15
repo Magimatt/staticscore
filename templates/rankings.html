@@ -22,12 +22,17 @@
                   <th>Posiscore</th>
               </tr>
               {% for movie in posi_rank %}
-                {% set release_year = movie_year_posi[movie['tmdb_id']] %}
+                {% set release_year = movie['release_date'] %}
+                {% set poster_path = "https://image.tmdb.org/t/p/w500" + movie['poster_path'] %}
                   <tr>
                       <td>
                         <a href="https://www.themoviedb.org/movie/{{ movie['tmdb_id'] }}-{{ movie['movie_name'] }}">
-                          {{ loop.index }}. {{ movie['movie_name'] }} ({{ release_year }})</td>
+                          <img src="{{ poster_path }}" style="height:100px;"/>
+                        </a> 
+                        <a href="https://www.themoviedb.org/movie/{{ movie['tmdb_id'] }}-{{ movie['movie_name'] }}">
+                          {{ loop.index }}. {{ movie['movie_name'] }} ({{ release_year }})
                         </a>
+                      </td>
                       <td>{{ "{:.2f}".format(movie['ave_posiscore']) }}</td>
                   </tr>
               {% endfor %}
@@ -41,12 +46,17 @@
                   <th>Combined Score</th>
               </tr>
               {% for movie in comb_rank %}
-                {% set release_year = movie_year_comb[movie['tmdb_id']] %}
+                {% set release_year = movie['release_date'] %}
+                {% set poster_path = "https://image.tmdb.org/t/p/w500" + movie['poster_path'] %}
                   <tr>
                       <td>
                         <a href="https://www.themoviedb.org/movie/{{ movie['tmdb_id'] }}-{{ movie['movie_name'] }}">
-                        {{ loop.index }}. {{ movie['movie_name'] }} ({{ release_year }})</td>
+                          <img src="{{ poster_path }}" style="height:100px;"/>
+                        </a> 
+                        <a href="https://www.themoviedb.org/movie/{{ movie['tmdb_id'] }}-{{ movie['movie_name'] }}">
+                          {{ loop.index }}. {{ movie['movie_name'] }} ({{ release_year }})
                         </a>
+                      </td>
                       <td>{{ "{:.2f}".format(movie['ave_combscore']) }}</td>
                   </tr>
               {% endfor %}
@@ -60,12 +70,17 @@
                   <th>Negascore</th>
               </tr>
               {% for movie in nega_rank %}
-                {% set release_year = movie_year_nega[movie['tmdb_id']] %}
+                {% set release_year = movie['release_date'] %}
+                {% set poster_path = "https://image.tmdb.org/t/p/w500" + movie['poster_path'] %}
                   <tr>
                       <td>
                         <a href="https://www.themoviedb.org/movie/{{ movie['tmdb_id'] }}-{{ movie['movie_name'] }}">
-                          {{ loop.index }}. {{ movie['movie_name'] }} ({{ release_year }})</td>
+                          <img src="{{ poster_path }}" style="height:100px;"/>
                         </a> 
+                        <a href="https://www.themoviedb.org/movie/{{ movie['tmdb_id'] }}-{{ movie['movie_name'] }}">
+                          {{ loop.index }}. {{ movie['movie_name'] }} ({{ release_year }})
+                        </a>
+                      </td>
                       <td>{{ "{:.2f}".format(movie['ave_negascore']) }}</td>
                   </tr>
               {% endfor %}
