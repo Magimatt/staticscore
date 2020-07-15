@@ -32,7 +32,9 @@
       />
     </a>
     </td>
-    <td>{{ movie['title'] }}</td>
+    <td>
+      <a href=""https://www.themoviedb.org/movie/{{ movie['id'] }}-{{ movie['title'] }}">"{{ movie['title'] }}</a>
+    </td>
     <td>{{ movie['release_date'] }}</td>
     <td>
       {% set form_action = "/vote" if movie['user_vote'] == None else "/update" %}

@@ -18,6 +18,10 @@ h1 {
   text-align: center;
 }
 
+a {
+  color: #be7eb9;
+}
+
 .intro {
   font: italic bold 14px;
   font-family: "Lucida Console", Monaco, monospace sans-serif;

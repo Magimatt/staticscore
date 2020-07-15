@@ -14,6 +14,10 @@
     {% block head %}{% endblock %}
     
     <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='assets/staticscore_favicon.ico') }}"
+    />
+    <link
       rel="stylesheet"
       href="{{ url_for('static', filename='assets/main.css') }}"
     />

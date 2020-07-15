@@ -1,13 +1,13 @@
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
 # Import Statements
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
-
 import os
 import uuid
 
 import tmdbsimple as tmdb
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
 from flask import (
     Flask,
@@ -24,6 +24,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///moviescores.db'
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
 # SQLalchemy Database Classes
@@ -48,13 +49,63 @@ class MovieScores(db.Model):
   def __repr__(self):
     return '<Score %r>' % self.tmdb_id
 
+#/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
+# SQLalchemy Database Migration
+#/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
+
+# I messed up and I need to add two columns ( poster_path and release_date) to the MovieInfo table.
+# SqlAlchemy doesn't have an easy way to migrate a database. So I'm going to write out a database
+# migration function (or set of functions, we'll see) tailored to this database. It will be run in the
+# python command line.
+
+# These are the new table classes
+class InfoTable(db.Model):
+  tmdb_id = db.Column(db.String(200), primary_key=True)
+  movie_name = db.Column(db.String(200), nullable=False)
+  release_date = db.Column(db.String(10), nullable=False)
+  poster_path = db.Column(db.String(200))
+  ave_posiscore = db.Column(db.Float, default=0)
+  ave_negascore = db.Column(db.Float, default=0)
+  ave_combscore = db.Column(db.Float, default=0)
+
+  def __repr__(self):
+    return '<Movie %r>' % self.movie_name
+
+class ScoresTable(db.Model):
+  date_created = db.Column(db.DateTime, default=datetime.utcnow, primary_key=True)
+  user_id = db.Column(db.String(36), nullable=False)
+  tmdb_id = db.Column(db.String(200), nullable=False)
+  posiscore = db.Column(db.Integer, nullable=False)
+  negascore = db.Column(db.Integer, nullable=False)
+
+  def __repr__(self):
+    return '<Score %r>' % self.tmdb_id
+
+# Migrates the old database to the new one.
+def migrate_database():
+  movieinfo_table_query = MovieInfo.query.all()
+  for movie in movieinfo_table_query:
+    new_movie_record = InfoTable(tmdb_id=movie.tmdb_id,
+                                 movie_name=movie.movie_name,
+                                 release_date=tmdb.Movies(movie.tmdb_id).release_date()[:4],
+                                 poster_path=tmdb.Movies(movies.tmdb_id).info()['poster_path'],
+                                 ave_posiscore=movie.ave_posiscore,
+                                 ave_negascore=movie.ave_negascore,
+                                 ave_combscore=movie.ave_combscore)
+    
+                                 
+    
+    
+  return None # placeholder
+
+
 
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
 # Flask Minutia
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
-
-app.secret_key = "It's a secret to everybody"
+FLASK_SECRET_KEY = os.getenv('FLASK_SECRET_KEY')
 TMDB_KEY = os.getenv('TMDB_KEY')
+app.secret_key = FLASK_SECRET_KEY
 tmdb.API_KEY = TMDB_KEY
 
 search_movies = tmdb.Search()
@@ -69,10 +120,11 @@ def average_table_scores(_tmdb_id):
   posi = db.session.execute("SELECT AVG(posiscore) FROM movie_scores WHERE tmdb_id=" + _tmdb_id).first()['AVG(posiscore)']
   nega = db.session.execute("SELECT AVG(negascore) FROM movie_scores WHERE tmdb_id=" + _tmdb_id).first()['AVG(negascore)']
   
-  # TODO: maybe weight the combined score toward negascores
+  # TODO: maybe weight the combined score slightly toward negascores
   return posi, nega, ((posi + nega) / 2)
   
 def validate_input(text):
+  text = str(escape(text))
   try:
     int(text)
     if (int(text) <= 10) and (int(text) >= 0):
@@ -91,7 +143,6 @@ def cookie_check():
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
 # Flask App Routes
 #/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\-/-\
-
 @app.route("/", methods=['GET'])
 def index():
   has_cookie = cookie_check()
@@ -101,17 +152,34 @@ def index():
   movies_order_nega = sorted(movies, key=lambda m: m.ave_negascore, reverse=True)[:10]
   movies_order_comb = sorted(movies, key=lambda m: m.ave_combscore, reverse=True)[:10]
   
+  # This is to get the posters for movies in the top 10 rankings. It would
+  # have been easier to just include a column originally, but I didn't and
+  # sqlalchemy doesn't support database migrations easily so here we are. 
+  posi_ids = [movie.tmdb_id for movie in movies_order_posi]
+  nega_ids = [movie.tmdb_id for movie in movies_order_nega]
+  comb_ids = [movie.tmdb_id for movie in movies_order_comb]
+  tmdb_results_posi_dict = {id:tmdb.Movies(id).info()['poster_path'] for id in posi_ids}
+  tmdb_results_nega_dict = {id:tmdb.Movies(id).info()['poster_path'] for id in nega_ids}
+  tmdb_results_comb_dict = {id:tmdb.Movies(id).info()['poster_path'] for id in comb_ids}
+  
+  
   # Set cookies if has_cookie is False
   if has_cookie:
     return render_template("index.html", 
                            top_posi=movies_order_posi, 
                            top_nega=movies_order_nega, 
-                           top_comb=movies_order_comb)
+                           top_comb=movies_order_comb,
+                           movie_poster_posi=tmdb_results_posi_dict,
+                           movie_poster_nega=tmdb_results_nega_dict,
+                           movie_poster_comb=tmdb_results_comb_dict)
   else:
     resp = make_response(render_template("index.html", 
                                          top_posi=movies_order_posi, 
                                          top_nega=movies_order_nega, 
-                                         top_comb=movies_order_comb))
+                                         top_comb=movies_order_comb,
+                                         movie_poster_posi=tmdb_results_posi_dict,
+                                         movie_poster_nega=tmdb_results_nega_dict,
+                                         movie_poster_comb=tmdb_results_comb_dict))
     resp.set_cookie("user_id", str(uuid.uuid4()))
     return resp
 
@@ -157,6 +225,7 @@ def results():
 def vote():
   if not cookie_check():
     flash("Hey A-hole! Stop trying to game the system... or maybe you're just an innocent bystander just trying to avoid cookies.")
+    return redirect('/')
   else:
     pass
   
@@ -239,17 +308,34 @@ def rankings():
   movies_order_nega = sorted(movies, key=lambda m: m.ave_negascore, reverse=True)
   movies_order_comb = sorted(movies, key=lambda m: m.ave_combscore, reverse=True)
   
+  # This is to get the 'release_date' for movies in the top 10 rankings. It would
+  # have been easier to just include a column originally, but I didn't and
+  # sqlalchemy doesn't support database migrations easily so here we are. 
+  posi_ids = [movie.tmdb_id for movie in movies_order_posi]
+  nega_ids = [movie.tmdb_id for movie in movies_order_nega]
+  comb_ids = [movie.tmdb_id for movie in movies_order_comb]
+  tmdb_results_posi_dict = {id:tmdb.Movies(id).info()['release_date'][:4] for id in posi_ids}
+  tmdb_results_nega_dict = {id:tmdb.Movies(id).info()['release_date'][:4] for id in nega_ids}
+  tmdb_results_comb_dict = {id:tmdb.Movies(id).info()['release_date'][:4] for id in comb_ids}
+  
   # Set cookies if has_cookie is False
   if has_cookie:
     return render_template("rankings.html", 
                            posi_rank=movies_order_posi, 
                            nega_rank=movies_order_nega, 
-                           comb_rank=movies_order_comb)
+                           comb_rank=movies_order_comb,
+                           movie_year_posi=tmdb_results_posi_dict,
+                           movie_year_nega=tmdb_results_nega_dict,
+                           movie_year_comb=tmdb_results_comb_dict)
   else:
     resp = make_response(render_template("rankings.html", 
                                          posi_rank=movies_order_posi, 
                                          nega_rank=movies_order_nega, 
-                                         comb_rank=movies_order_comb))
+                                         comb_rank=movies_order_comb,
+                                         movie_year_posi=tmdb_results_posi_dict,
+                                         movie_year_nega=tmdb_results_nega_dict,
+                                         movie_year_comb=tmdb_results_comb_dict))
+    
     resp.set_cookie("user_id", str(uuid.uuid4()))
     return resp
 
