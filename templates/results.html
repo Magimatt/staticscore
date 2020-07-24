@@ -53,17 +53,17 @@
         />
         <input
           type="hidden"
-          id="movieid-{{ movie['release_date'] }}"
+          id="movierelease-{{ movie['id'] }}"
           name="movie-release-date"
           value="{{ movie['release_date'] }}"
         />
         <input
           type="hidden"
-          id="movieid-{{ movie['poster_path'] }}"
+          id="movieposter-{{ movie['id'] }}"
           name="movie-poster-path"
           value="{{ movie['poster_path'] }}"
         />
-        <div style="float:left;" class="poll">Posi-score<br/><!-- use a "radio button" electron shaped option instead -->
+        <div style="float:left;" class="poll">Posi-score<br/>
           <input
             type="text"
             id="ps-{{ movie['id'] }}"
@@ -71,7 +71,7 @@
             style="width:20px"
             {% set vote_value = "" if movie['user_vote'] == None else movie['user_vote'].posiscore %}
             value="{{ vote_value }}"
-          ><br/>Nega-score<br/><!-- use a "radio button" electron shaped option instead -->
+          /><br/>Nega-score<br/>
           <input
             type="text"
             id="ns-{{ movie['id'] }}"
@@ -79,7 +79,7 @@
             style="width:20px"
             {% set vote_value = "" if movie['user_vote'] == None else movie['user_vote'].negascore %}
             value="{{ vote_value }}"
-          ><br/>
+          /><br/>
         </div>
         <div style="float:right;" class="poll">
           <input
@@ -88,7 +88,7 @@
             value="{{ submit_text }}"
             id="vote-{{ movie['id'] }}"
             name="vote"
-          >
+          />
         </div>
       </form>
     </td>

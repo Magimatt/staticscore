@@ -224,8 +224,8 @@ def vote():
     try:
       if existing_movie == None:
         new_movie = MovieInfo(tmdb_id=movie_id,
-                              release_date=request.form['release_date'], # These two are from the
-                              poster_path=request.form['poster_path'],   # updated database.
+                              release_date=request.form['movie-release-date'], # These two are from the
+                              poster_path=request.form['movie-poster-path'],   # updated database.
                               movie_name=movie_title,
                               ave_posiscore=score_triuple[0],
                               ave_negascore=score_triuple[1],
@@ -239,7 +239,8 @@ def vote():
 
       db.session.commit()    
       flash("You're scores have been recorded.")
-    except:
+    except Exception as e:
+      print(e)
       flash("An error occured when submitting your vote. Please try again later.")
 
   return redirect('/')
@@ -270,7 +271,8 @@ def update():
 
       db.session.commit()    
       flash("You're scores have been updated successfully.")
-    except:
+    except Exception as e:
+      print(e)
       flash("An error occured when submitting your update. Please try again later.")
 
   return redirect('/')
